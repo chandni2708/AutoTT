@@ -1,54 +1,63 @@
 var addClick = document.getElementById('addClick');
 var subjectInput = document.getElementById('subjectInput');
 var addContent = document.getElementById('addContent');
+var weightContent = document.getElementById('weightContent');
 var classInput = document.getElementById('classInput');
 var Success = document.getElementById("lblsuccess");
 var showSub = [];
-var subjectRegex = /^[a-zA-Z]+$/;
-
+var showWeight = [];
+var subjectRegex = /^[a-z]+$/i;
+var weightageInput = document.getElementById('weightageInput');
 
 addClick.addEventListener('click', () => {
-    debugger
-    var subjectValue = subjectInput.value;
+    debugger;
+    var subjectValue = subjectInput.value.trim().toLowerCase();
+    var weightageValue = weightageInput.value;
+
+    if (weightageValue == "" || weightageValue == 0 || weightageValue == null) {
+        showError("Please choose a weightage.");
+        return false;
+    }
     if (subjectValue !== "") {
         if (subjectRegex.test(subjectValue)) {
-            if (showSub.length === 0 || showSub[showSub.length - 1] !== subjectValue) {
+            if (showSub.length === 0 || showSub[showSub.length - 1].toLowerCase() !== subjectValue || showWeight.length === 0) {
                 showSub.push(subjectValue);
-                addContent.textContent = showSub.join(", ");
+                showWeight.push(weightageValue + "%");
+                addContent.textContent = "Selected Subjects : " + showSub.join(", ");
+                weightContent.textContent = "Selected Subject Weightage : " + showWeight.join(",");
                 Success.innerHTML = "Subject Added Successfully";
                 Success.style.display = "block";
                 subjectInput.value = "";
+                weightageInput.value = 0;
 
                 setTimeout(function () {
                     Success.style.display = "none";
                 }, 1000);
             } else {
-                Success.innerHTML = "Please enter a different subject";
-                Success.style.display = "block";
-
-                setTimeout(function () {
-                    Success.style.display = "none";
-                }, 1000);
+                showError("Please enter a different subject.");
+                subjectInput.value = "";
             }
-        }
-         else {
-            Success.innerHTML = "Please enter a valid subject (only characters)";
-            Success.style.display = "block";
+        } else {
+            showError("Please enter a valid subject (only characters).");
             subjectInput.value = "";
-
-            setTimeout(function () {
-                Success.style.display = "none";
-            }, 1000);
         }
+    } else {
+        showError("Please enter a subject.");
     }
-    });
+});
+
+function showError(message) {
+    Success.innerHTML = message;
+    Success.style.display = "block";
+
+    setTimeout(function () {
+        Success.style.display = "none";
+    }, 1000);
+}
 
 debugger;
 function generateTT(showSub) {
-    debugger;
-    console.log("clickedddd")
     var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    // var periods = ['1st', '2nd', '3rd', '4th', '5th'];
     var periods = [
         '8:00 AM - 8:30 AM',
         '8:35 AM - 9:05 AM',
@@ -58,23 +67,17 @@ function generateTT(showSub) {
         '10:55 AM - 11:25 AM',
         '11:30 AM - 12:00 PM'
     ];
-    //  var subjects = [
-    // ['Maths', 'English', 'Science', 'History', 'Geography'],
-    // ['Physics', 'Chemistry', 'Biology', 'Maths', 'English'],
-    // ['English', 'History', 'Geography', 'Physics', 'Chemistry'],
-    // ['Biology', 'Maths', 'English', 'Science', 'History'],
-    // ['Chemistry', 'Biology', 'Maths', 'English', 'Science']
-    // ];
-    //debugger;;
 
-    // var subjects = subjectInputValue.split(',');
 
     var subjects = showSub;
+    var weightages = showWeight.map(weight => parseInt(weight));
     var table = document.createElement('table');
     table.className = "w-auto table text-warning m-3 border border-dark";
+
     var thead = document.createElement('thead');
     var headerRow = document.createElement('tr');
     headerRow.className = "bg-warning text-dark p-2";
+
     var th = document.createElement('th');
     th.textContent = 'Time / Day';
     headerRow.appendChild(th);
@@ -89,7 +92,7 @@ function generateTT(showSub) {
     table.appendChild(thead);
 
     var tbody = document.createElement('tbody');
-    debugger;
+
     for (var j = 0; j < periods.length; j++) {
         var bodyRow = document.createElement('tr');
         bodyRow.className = "p-3";
@@ -104,16 +107,26 @@ function generateTT(showSub) {
             recessTd.className = "text-warning fs-4 text-center";
             recessTd.textContent = 'Recess';
             bodyRow.appendChild(recessTd);
-        } else {
+
+        }
+        else {
             for (var k = 0; k < days.length; k++) {
-                var newSubjects = subjects.toString().split(',');
-             //convertef ['maths,science'] to 'maths,science' with to string and maded it to ['maths','science'] with the help of split;
+                var newSubjects = [];
+                for (var s = 0; s < subjects.length; s++) {
+                    var tempSubject = subjects[s];
+                    var subjectWeightage = weightages[s];
+                    for (var w = 0; w < subjectWeightage; w++) {
+                        newSubjects.push(tempSubject);
+                    }
+                }
                 var randomIndex = Math.floor(Math.random() * newSubjects.length);
                 var sub = newSubjects[randomIndex];
+                var capitalizedSub = sub.charAt(0).toUpperCase() + sub.slice(1);
 
                 var subTd = document.createElement("td");
-                subTd.textContent = sub;
+                subTd.textContent = capitalizedSub;
                 bodyRow.appendChild(subTd);
+
             }
         }
 
@@ -121,46 +134,47 @@ function generateTT(showSub) {
     }
     table.appendChild(tbody);
 
-
-    //debugger;;
     var classInputValue = document.getElementById('classInput').value;
     if (classInputValue.trim() == null || classInputValue.trim() == " ") {
         return false;
-    }
-    else {
+    } else {
         var textContainer = document.getElementById('textContainer');
         textContainer.innerText = "Showing Time-Table For Class " + classInputValue;
+
         var timeTableContainer = document.getElementById('timeTableContainer');
         timeTableContainer.innerHTML = '';
         timeTableContainer.appendChild(table);
-        
-
     }
-
 }
-
 
 var generateBtn = document.getElementById('generateBtn');
 generateBtn.addEventListener('click', function () {
-    if (classInput.value == "" || classInput.value == null && subjectInput.value == "" || subjectInput.value == null) {
-        return false;
+    // if (classInput.value == "" || classInput.value == null && subjectInput.value == "" || subjectInput.value == null || weightageInput.value == 0 || weightageInput.value == null) {
+    //   return false;
+    // }
+    // else {
+    debugger;
+    if (showSub.length !== 0 && showWeight !== 0) {
+        generateTT(showSub);
     }
-    else {
-        debugger;
-        if (showSub.length !== 0) {
-            generateTT(showSub);
-        }
-    }
+
 });
+
+
 
 var clearBtn = document.getElementById('clearBtn');
 clearBtn.addEventListener('click', () => {
-          subjectInput.value = '';
-          classInput.value = "";
+    subjectInput.value = '';
+    classInput.value = "";
     var timeTableContainer = document.getElementById('timeTableContainer');
     var textContainer = document.getElementById('textContainer');
     timeTableContainer.innerHTML = '';
     textContainer.innerText = '';
-          showSub = [];
+    addContent.textContent = '';
+    weightContent.textContent = '';
+    showSub = [];
+    showWeight = [];
+    weightageInput.value = 0;
+
 })
 
