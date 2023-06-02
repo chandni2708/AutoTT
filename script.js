@@ -110,6 +110,7 @@ function generateTT(showSub) {
 
         }
         else {
+            debugger;
             for (var k = 0; k < days.length; k++) {
                 var newSubjects = [];
                 for (var s = 0; s < subjects.length; s++) {
